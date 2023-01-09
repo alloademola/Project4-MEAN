@@ -39,4 +39,24 @@ so we are installing, NodeJS with the command below
 sudo apt install -y nodejs
  so after installing the nodejs, we are going to move to Step 2 which is the Installation of MongoDB
  
- To do that, we are going to follow this. 
+ To do that, we are going to follow this step below
+ 
+ MongoDB stores data in flexible, JSON-like documents. Fields in a database can vary from document to document and data structure can be changed over time. For our example application, we are adding book records to MongoDB that contain book name, isbn number, author, and number of pages.
+mages/WebConsole.gif
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+
+<img width="1440" alt="Screenshot 2023-01-03 at 15 49 15" src="https://user-images.githubusercontent.com/118350020/210381974-8373572c-e0b0-46d1-9c75-e0df17dab998.png">
+
+so after this we are going to add the next key below
+
+
+echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+
+<img width="1440" alt="Screenshot 2023-01-03 at 15 57 46" src="https://user-images.githubusercontent.com/118350020/210382566-ea3d4033-cc2d-457e-9531-45e324d2933d.png">
+
+
+now we are going to install MongoDB with the below command
+
+sudo apt install -y mongodb
+
