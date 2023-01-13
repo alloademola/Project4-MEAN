@@ -98,6 +98,253 @@ mkdir Books && cd Books
 <img width="1440" alt="Screenshot 2023-01-09 at 15 46 46" src="https://user-images.githubusercontent.com/118350020/211336518-daac19de-0176-4339-9af0-cd6a6f724103.png
                                                                
 so we are going to add a file named server.js with the cammand below
-                                                   
-                                                               
-                                                               
+vi server.js
+<img width="1440" alt="Screenshot 2023-01-12 at 15 33 26" src="https://user-images.githubusercontent.com/118350020/212094430-e36ad4d3-46ee-41f4-9147-2fa18e311243.png">
+
+Copy and paste the web server code below into the server.js file.
+
+var express = require('express');
+var bodyParser = require('body-parser');
+var app = express();
+app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.json());
+require('./apps/routes')(app);
+app.set('port', 3300);
+app.listen(app.get('port'), function() {
+    console.log('Server up: http://localhost:' + app.get('port'));
+});
+
+<img width="1440" alt="Screenshot 2023-01-12 at 15 36 23" src="https://user-images.githubusercontent.com/118350020/212095010-8f30acf0-3b1a-4ddb-9a63-4d6a9bc20eb9.png">
+
+now we are going to the final stage
+so we are going to INSTALL EXPRESS AND SET UP ROUTES TO THE SERVER
+
+Step 3: Install Express and set up routes to the server
+Express is a minimal and flexible Node.js web application framework that provides features for web and mobile applications. We will use Express in to pass book information to and from our MongoDB database.
+
+We also will use Mongoose package which provides a straight-forward, schema-based solution to model your application data. We will use Mongoose to establish a schema for the database to store data of our book register.
+
+so we are going to use this command below
+sudo npm install express mongoose
+
+<img width="1440" alt="Screenshot 2023-01-12 at 15 48 49" src="https://user-images.githubusercontent.com/118350020/212098177-c504d822-e27b-449a-a877-791b03f9f28d.png">
+
+so In ‘Books’ folder, we are going to create a folder named apps with the below  command
+mkdir apps && cd apps
+
+so we are going to Create a file named routes.js with the command below
+
+vi routes.js
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 05 40" src="https://user-images.githubusercontent.com/118350020/212102555-3a1cd678-7e40-424f-bebe-bad89d934370.png">
+and we are going to Copy and paste the code below into routes.js
+
+var Book = require('./models/book');
+module.exports = function(app) {
+  app.get('/book', function(req, res) {
+    Book.find({}, function(err, result) {
+      if ( err ) throw err;
+      res.json(result);
+    });
+  }); 
+  app.post('/book', function(req, res) {
+    var book = new Book( {
+      name:req.body.name,
+      isbn:req.body.isbn,
+      author:req.body.author,
+      pages:req.body.pages
+    });
+    book.save(function(err, result) {
+      if ( err ) throw err;
+      res.json( {
+        message:"Successfully added book",
+        book:result
+      });
+    });
+  });
+  app.delete("/book/:isbn", function(req, res) {
+    Book.findOneAndRemove(req.query, function(err, result) {
+      if ( err ) throw err;
+      res.json( {
+        message: "Successfully deleted the book",
+        book: result
+      });
+    });
+  });
+  var path = require('path');
+  app.get('*', function(req, res) {
+    res.sendfile(path.join(__dirname + '/public', 'index.html'));
+  });
+};
+                                                
+ <img width="1440" alt="Screenshot 2023-01-12 at 16 09 21" src="https://user-images.githubusercontent.com/118350020/212103794-4de968d2-d20f-4377-a71d-cbe71b5204d1.png">                                              
+ 
+ <img width="1440" alt="Screenshot 2023-01-12 at 16 09 30" src="https://user-images.githubusercontent.com/118350020/212103964-1609a231-f616-4e69-9fb9-f8002ed2b499.png">
+
+    so in the app folder , we are going create a folder named models by using the cammand below
+    
+    mkdir models && cd models
+    
+    after this we are now going to Create a file named book.js with the command
+    
+    vi book.js
+    
+    <img width="1440" alt="Screenshot 2023-01-12 at 16 09 30" src="https://user-images.githubusercontent.com/118350020/212106139-cf579cf9-a77e-49d0-972b-edeae64680bc.png">
+So after doing that, we are now going to Copy and paste the code below into ‘book.js’
+
+var mongoose = require('mongoose');
+var dbHost = 'mongodb://localhost:27017/test';
+mongoose.connect(dbHost);
+mongoose.connection;
+mongoose.set('debug', true);
+var bookSchema = mongoose.Schema( {
+  name: String,
+  isbn: {type: String, index: true},
+  author: String,
+  pages: Number
+});
+var Book = mongoose.model('Book', bookSchema);
+module.exports = mongoose.model('Book', bookSchema);    
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 20 24" src="https://user-images.githubusercontent.com/118350020/212106641-811f9d1d-1a17-40c2-9bf4-d65d218e9440.png">
+
+So on our step 4, we are going Access the routes with AngularJS
+
+AngularJS provides a web framework for creating dynamic views in your web applications. In this documentation we are going to use AngularJS to connect our web page with Express and perform actions on our book register.
+
+so firstly we are going to Change the directory back to ‘Books’ using the  command below
+
+cd ../..
+
+so after that,  we are going to Create a folder named public. using the command below
+
+mkdir public && cd public
+
+And we are going to Add a file named script.js with the below command 
+
+vi script.js
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 20 24" src="https://user-images.githubusercontent.com/118350020/212108692-fcb0d193-ef1d-4419-a2a9-cab2de52b9b9.png">
+
+So we are to Copy and paste the Code below (controller configuration defined) into the script.js file.
+
+var app = angular.module('myApp', []);
+app.controller('myCtrl', function($scope, $http) {
+  $http( {
+    method: 'GET',
+    url: '/book'
+  }).then(function successCallback(response) {
+    $scope.books = response.data;
+  }, function errorCallback(response) {
+    console.log('Error: ' + response);
+  });
+  $scope.del_book = function(book) {
+    $http( {
+      method: 'DELETE',
+      url: '/book/:isbn',
+      params: {'isbn': book.isbn}
+    }).then(function successCallback(response) {
+      console.log(response);
+    }, function errorCallback(response) {
+      console.log('Error: ' + response);
+    });
+  };
+  $scope.add_book = function() {
+    var body = '{ "name": "' + $scope.Name + 
+    '", "isbn": "' + $scope.Isbn +
+    '", "author": "' + $scope.Author + 
+    '", "pages": "' + $scope.Pages + '" }';
+    $http({
+      method: 'POST',
+      url: '/book',
+      data: body
+    }).then(function successCallback(response) {
+      console.log(response);
+    }, function errorCallback(response) {
+      console.log('Error: ' + response);
+    });
+  };
+});
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 29 02" src="https://user-images.githubusercontent.com/118350020/212109359-a3dab53b-6c36-4115-bf3c-96222cb49689.png">                                     
+
+So in our In public folder,we are going to create a file named index.html;  with the below command
+
+vi index.html
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 29 02" src="https://user-images.githubusercontent.com/118350020/212110068-ddd24ea2-a56d-49d0-b96c-5b62f06110a3.png">
+
+and later copy and paste the code below into index.html file.
+
+<!doctype html>
+<html ng-app="myApp" ng-controller="myCtrl">
+  <head>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js"></script>
+    <script src="script.js"></script>
+  </head>
+  <body>
+    <div>
+      <table>
+        <tr>
+          <td>Name:</td>
+          <td><input type="text" ng-model="Name"></td>
+        </tr>
+        <tr>
+          <td>Isbn:</td>
+          <td><input type="text" ng-model="Isbn"></td>
+        </tr>
+        <tr>
+          <td>Author:</td>
+          <td><input type="text" ng-model="Author"></td>
+        </tr>
+        <tr>
+          <td>Pages:</td>
+          <td><input type="number" ng-model="Pages"></td>
+        </tr>
+      </table>
+      <button ng-click="add_book()">Add</button>
+    </div>
+    <hr>
+    <div>
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Isbn</th>
+          <th>Author</th>
+          <th>Pages</th>
+
+        </tr>
+        <tr ng-repeat="book in books">
+          <td>{{book.name}}</td>
+          <td>{{book.isbn}}</td>
+          <td>{{book.author}}</td>
+          <td>{{book.pages}}</td>
+
+          <td><input type="button" value="Delete" data-ng-click="del_book(book)"></td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>
+                                                                                
+                                                                                
+<img width="1440" alt="Screenshot 2023-01-12 at 16 34 51" src="https://user-images.githubusercontent.com/118350020/212110689-d560ee77-8985-4858-a05f-d061a68225ef.png">                                                                              
+<img width="1440" alt="Screenshot 2023-01-12 at 16 34 56" src="https://user-images.githubusercontent.com/118350020/212110800-49a2dae6-3c48-413c-97e0-eb4a588c6f8b.png">
+
+so we are going to Change the directory back up to Books using the below command
+
+cd ..
+
+we can now Start the server by running this command below 
+
+node server.js
+
+<img width="1440" alt="Screenshot 2023-01-13 at 14 40 50" src="https://user-images.githubusercontent.com/118350020/212333563-9ad47401-87bb-48e4-96fd-ded3e1d38b19.png">
+
+so your final outcome should look like this screenshoot below
+
+<img width="1440" alt="Screenshot 2023-01-13 at 14 39 33" src="https://user-images.githubusercontent.com/118350020/212333909-2b51fbbe-dc92-4b2e-aa60-019bcf7edabc.png">
+
+<img width="1440" alt="Screenshot 2023-01-12 at 16 34 56" src="https://user-images.githubusercontent.com/118350020/212110800-49a2dae6-3c48-413c-97e0-eb4a588c6f8b.png">
+
+finish
